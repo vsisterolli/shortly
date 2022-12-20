@@ -13,14 +13,15 @@ export default async function validateSignIn(req, res, next) {
         if(validation.error)
             return res.status(422).send(validation.error.message);
         
-        const passwords = await connection.query("SELECT password FROM users WHERE email=$1", [req.body.email])
-        if(!passwords.rows.length)
+        const user = await connection.query("SELECT password, id FROM users WHERE email=$1", [req.body.email])
+        if(!user.rows.length)
             return res.status(401).send("Combinação de usuário/senha não encontrada");
         
-        const encryptedPasssword = passwords.rows[0].password;
+        const encryptedPasssword = user.rows[0].password;
         if(!bcrypt.compareSync(req.body.password, encryptedPasssword)) 
             return res.status(401).send("Combinação de usuário/senha não encontrada");
 
+        res.locals.id = user.rows[0].id;
         next();
     }
     catch(e) {
