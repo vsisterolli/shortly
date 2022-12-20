@@ -7,13 +7,12 @@ dotenv.config();
 export async function signUp(req, res) {
     try {
         const {name, email, password} = req.body;
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = bcrypt.hashSync(password, 10);
         await connection.query(`INSERT INTO users (username, email, password)
                                 VALUES ($1, $2, $3)`, [name, email, hashedPassword]);
         res.sendStatus(201);
     }
     catch(e) {
-        console.log(e)
         res.status(500).send(e.message);
     }
 }

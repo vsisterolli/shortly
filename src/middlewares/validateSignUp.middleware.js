@@ -15,7 +15,6 @@ export default async function validateSignUp(req, res, next) {
             return res.status(422).send(validation.error.message);
         
         const email = await connection.query("SELECT email FROM users WHERE email=$1", [req.body.email])
-        console.log(email.rows.length)
         if(email.rows.length)
             return res.status(409).send("Email já cadastrado");
 
