@@ -25,3 +25,31 @@ export async function getUrl(req, res) {
         res.status(500).send(e.message);
     }
 }
+
+export async function openUrl(req, res) {
+    try {
+        const { shortUrl } = req.params;
+        const url = await connection.query(`SELECT id, url, views FROM links WHERE "shortUrl"=$1`, [shortUrl]);
+        if(!url.rows.length)
+            return res.status(404).send("shortUrl não encontrada");
+        await connection.query(`UPDATE links SET views=$1 WHERE id=$2`,
+                                [url.rows[0].views + 1, url.rows[0].id])
+        res.status(301).redirect("//" + url.rows[0].url);
+    }
+    catch(e) {
+        console.log(e)
+        res.status(500).send(e.message);
+    }
+}
+
+export async function deleteUrl(req, res) {
+    try {
+        const { id } = req.params;
+        await connection.query("DELETE FROM links WHERE id=$1", [id]);
+        res.sendStatus(204)
+    }
+    catch(e) {
+        console.log(e)
+        res.status(500).send(e.message);
+    }
+}

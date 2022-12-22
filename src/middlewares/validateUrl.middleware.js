@@ -7,7 +7,6 @@ const urlSchema = Joi.object({
 
 export default function validateUrl(req, res, next) {
     try {
-        console.log("Hi!")
         const validation = urlSchema.validate(req.body);
         if(validation.error)
             return res.status(422).send(validation.error.message);
