@@ -24,20 +24,45 @@ export async function signIn(req, res) {
 }
 
 export async function displayUsersLinks(req, res) {
-    const {userId} = res.locals;
-    const user = await connection.query(`SELECT 
-                                            u.id, u.username AS "name",
-                                            SUM(l.views) AS "visitCount",
-                                            array_agg(json_build_object(
-                                                'id', l.id,
-                                                'shortUrl', l."shortUrl",
-                                                'url', l.url,
-                                                'visitCount', l.views
-                                            )) AS "shortenedUrls" 
-                                        FROM users u
-                                        JOIN links l ON l."userId"=$1
-                                        WHERE u.id=$1
-                                        GROUP BY u.id
-                                        `, [userId]);
-    res.send(user.rows[0])
+    try {
+        const {userId} = res.locals;
+        const user = await connection.query(`SELECT 
+                                                u.id, u.username AS "name",
+                                                SUM(l.views) AS "visitCount",
+                                                array_agg(json_build_object(
+                                                    'id', l.id,
+                                                    'shortUrl', l."shortUrl",
+                                                    'url', l.url,
+                                                    'visitCount', l.views
+                                                )) AS "shortenedUrls" 
+                                            FROM users u
+                                            JOIN links l ON l."userId"=$1
+                                            WHERE u.id=$1
+                                            GROUP BY u.id
+                                            `, [userId]);
+        res.send(user.rows[0])
+    }
+    catch(e) {
+        console.log(e);
+        res.status(500).send(e.message);
+    }
+}
+
+export async function getRanking(req, res) {
+    try {
+        const ranking = await connection.query(`SELECT
+                                                    u.id, u.username AS name,
+                                                    COUNT(l) AS "linksCount",
+                                                    SUM(COALESCE(l.views, 0)) AS "visitCount"
+                                                FROM users u
+                                                LEFT JOIN links l ON l."userId"=u.id
+                                                GROUP BY u.id
+                                                ORDER BY "visitCount" DESC
+                                                LIMIT 10`);
+        res.send(ranking.rows)
+    }
+    catch(e) {
+        console.log(e);
+        res.status(500).send(e.message);
+    }
 }

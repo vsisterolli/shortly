@@ -5,7 +5,7 @@ const signUpSchema = Joi.object({
     "name": Joi.string().max(19).required(),
     "email": Joi.string().email().required(),
     "password": Joi.string().max(19).required(),
-    "confirmPassword": Joi.ref("password")
+    "confirmPassword": Joi.string().required().valid(Joi.ref("password"))
 });
 
 export default async function validateSignUp(req, res, next) {
