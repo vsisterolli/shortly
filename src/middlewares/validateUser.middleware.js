@@ -7,7 +7,7 @@ export default function validateUser(req, res, next) {
         const authorization = req.headers.authorization;
         if(!authorization)
             return res.status(401).send("Header inválido");
-        const uncryptedJwt = jsonwebtoken.verify(authorization, process.env.JWT_KEY || "cabra macho");
+        const uncryptedJwt = jsonwebtoken.verify(authorization, process.env.JWT_KEY);
         res.locals.userId = uncryptedJwt.userId;
         next();
     }

@@ -19,7 +19,7 @@ export async function signUp(req, res) {
 
 export async function signIn(req, res) {
     const token = jsonwebtoken.sign({userId: res.locals.id}, 
-                                        process.env.JWT_KEY || "cabra macho");
+                                        process.env.JWT_KEY);
     res.send(token);
 }
 
