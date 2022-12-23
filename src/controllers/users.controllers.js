@@ -22,3 +22,22 @@ export async function signIn(req, res) {
                                         process.env.JWT_KEY || "cabra macho");
     res.send(token);
 }
+
+export async function displayUsersLinks(req, res) {
+    const {userId} = res.locals;
+    const user = await connection.query(`SELECT 
+                                            u.id, u.username AS "name",
+                                            SUM(l.views) AS "visitCount",
+                                            array_agg(json_build_object(
+                                                'id', l.id,
+                                                'shortUrl', l."shortUrl",
+                                                'url', l.url,
+                                                'visitCount', l.views
+                                            )) AS "shortenedUrls" 
+                                        FROM users u
+                                        JOIN links l ON l."userId"=$1
+                                        WHERE u.id=$1
+                                        GROUP BY u.id
+                                        `, [userId]);
+    res.send(user.rows[0])
+}
